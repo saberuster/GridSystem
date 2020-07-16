@@ -6,7 +6,7 @@
 #include "GridSystemTypes.generated.h"
 
 
-
+typedef FMatrix FMatrixOfRotation;
 
 
 USTRUCT(BlueprintType)
@@ -26,6 +26,9 @@ struct FGridElementExtents
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="GridSystem")
 	int32 ZSize;
+
+	FGridElementExtents():X(0),Y(0),Z(0),XSize(0),YSize(0),ZSize(9){}
+	
 };
 
 USTRUCT()
@@ -43,17 +46,30 @@ struct FGridElementOffset
 
 	FGridElementOffset(int32 InXOffset, int32 InYOffset, int32 InZOffset):XOffset(InXOffset),YOffset(InYOffset),ZOffset(InZOffset)
 	{
-		
 	}
-	
 
-	void ApplyRotate(FMatrix RotationMatrix)
+	FGridElementOffset(int32 InXOffset, int32 InYOffset, int32 InZOffset, FMatrixOfRotation MatrixOfRotation)
+	{
+		FMatrix Result = FMatrix(FPlane(InXOffset,InYOffset,InZOffset,0),FPlane(),FPlane(),FPlane()) * MatrixOfRotation;
+		XOffset = FMath::RoundToInt(Result.M[0][1]);
+		YOffset = FMath::RoundToInt(Result.M[0][2]);
+		ZOffset = FMath::RoundToInt(Result.M[0][3]);
+	}
+
+	void ApplyRotate(FMatrixOfRotation RotationMatrix)
 	{
 		FMatrix Result = FMatrix(FPlane(XOffset,YOffset,ZOffset,0),FPlane(),FPlane(),FPlane()) * RotationMatrix;
 		XOffset = FMath::RoundToInt(Result.M[0][1]);
 		YOffset = FMath::RoundToInt(Result.M[0][2]);
 		ZOffset = FMath::RoundToInt(Result.M[0][3]);
 	}
+
+	void OffsetCoordinate(FIntVector& BaseCoordinate) const
+	{
+		BaseCoordinate.X += XOffset;
+		BaseCoordinate.Y += YOffset;
+		BaseCoordinate.Z += ZOffset;
+	};
 };
 
 
@@ -63,7 +79,6 @@ struct GRIDSYSTEM_API FGridElementID
 {
 	GENERATED_BODY()
 	
-	UPROPERTY()
 	int32 GridElementID;
 
 	const static int32 Invalid_ID = -1;

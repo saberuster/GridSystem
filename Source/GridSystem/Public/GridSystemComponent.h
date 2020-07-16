@@ -14,7 +14,10 @@ class GRIDSYSTEM_API UGridSystemComponent : public UActorComponent
 
 public:
 
-	static const FMatrix Rxz90;
+	static const FMatrixOfRotation No_Rotation;
+	static const FMatrixOfRotation Rxz90; // xz plane rotation
+	static const FMatrixOfRotation Rxy90; // xy plane rotation
+	static const FMatrixOfRotation Ryz90; // yz plane rotation
 
 	// Sets default values for this component's properties
 	UGridSystemComponent();
@@ -27,18 +30,18 @@ protected:
 	UPROPERTY(BlueprintReadOnly,EditAnywhere,Category="GridSystem")
 	TArray<FGridElementID> PlacementElementIDs;
 
-	UPROPERTY()
-	FMatrix GridRotationMatrix;
+	FMatrixOfRotation GridRotationMatrix;
 
-	UPROPERTY()
 	bool bAlreadyRegistered;
 	
 public:
 
 	UFUNCTION(BlueprintCallable,Category="GridSystem")
 	void PlaceActor();
-	
-	void SetGridRotationMatrix(const FMatrix& RotationMatrix);
+
+	void ResetRotationMatrix();
+	void SetGridRotationMatrix(const FMatrixOfRotation& RotationMatrix);
+	void AppendRotationMatrix(const FMatrixOfRotation& RotationMatrix);
 	
 	const TArray<FGridElementID>& GetPlacementElementIDs() const {return PlacementElementIDs;}
 
@@ -49,10 +52,11 @@ public:
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
     	
 	void RefreshGridElementIDs();
-		
+
 };

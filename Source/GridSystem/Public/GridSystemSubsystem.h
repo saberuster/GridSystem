@@ -41,6 +41,5 @@ protected:
 	UPROPERTY()
 	TArray<UGridElement*> GridElements;
 
-	UPROPERTY()
 	bool bGridsInitialized;
 };
